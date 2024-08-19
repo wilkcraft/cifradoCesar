@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cifrador Cesar</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@500&display=swap');
+
+        :root {
+            --color-terminal: #12243a;
+            --color-fondo: #2c4b7a;
+            --color-texto: #e0e6ed;
+            --color-destacado: #83a1c4;
+            --borde-redondo: 4px;
+        }
+
+        * {
+            font-family: 'Source Code Pro', monospace;
+        }
+
+        body {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--color-fondo);
+            color: var(--color-texto);
+        }
+
+        input, button {
+            border: none;
+            outline: none;
+        }
+
+        main {
+            padding: 25px;
+            box-shadow: 8px 8px 35px 0px rgb(0 0 0 / 75%);
+            border-radius: var(--borde-redondo);
+            background-color: var(--color-terminal);
+        }
+
+        h1, h2 {
+            margin: 0;
+        }
+
+        #input-original, #input-descifrar, #resultado, #descifrado {
+            background-color: var(--color-terminal);
+            width: -webkit-fill-available;
+        }
+
+        #input-original, #input-descifrar {
+            margin: 10px 0 0;
+            padding: 10px;
+            color: var(--color-texto);
+            border-top-left-radius: var(--borde-redondo);
+            border-top-right-radius: var(--borde-redondo);
+        }
+
+        #resultado, #descifrado {
+            height: 20px;
+            color: var(--color-destacado);
+            padding: 0 10px 10px;
+            border-bottom-left-radius: var(--borde-redondo);
+            border-bottom-right-radius: var(--borde-redondo);
+        }
+
+        .rango {
+            margin-top: 10px;
+            display: grid;
+            grid-template-columns: 1fr 30px;
+            text-align: center;
+            align-items: center;
+        }
+
+        input[type='range'] {
+            -webkit-appearance: none;
+            border-radius: var(--borde-redondo);
+            background:var(--color-terminal);
+            margin: 0;
+            padding: 0 5px;
+            height: 20px;
+        }
+
+        input[type='range']::-webkit-slider-thumb {
+            cursor: pointer;
+            -webkit-appearance: none;
+            background:white;
+            border-radius: 50%;
+            height:10px;
+            width:10px;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>Cifrador Cesar.</h1>
+        <form id="cifrador" autocomplete="off">
+            <input id="input-original" spellcheck="false" placeholder="Ingrese el texto a cifrar" type="text" name="text">
+        </form>
+        <div id="resultado"></div>
+        <div class="rango">
+            <input id="rango" type="range" value="10" min="1" max="20" oninput="this.nextElementSibling.value = this.value">
+            <output>10</output>
+        </div>
+
+        <h2>Descifrador Cesar</h2>
+        <form id="descifrador" autocomplete="off">
+            <input id="input-descifrar" spellcheck="false" placeholder="Ingrese el texto a descifrar" type="text" name="text">
+        </form>
+        <div id="descifrado"></div>
+    </main>
+    <script>
+        const alfabeto = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","Ñ","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
+        const inputOriginal = document.getElementById('input-original');
+        const cifrador = document.getElementById('cifrador');
+        const resultado = document.getElementById('resultado');
+        const rango = document.getElementById('rango');
+
+        const inputDescifrar = document.getElementById('input-descifrar');
+        const descifrador = document.getElementById('descifrador');
+        const descifrado = document.getElementById('descifrado');
+
+        const shiftMessage = (wordArray, shift) => {
+            return wordArray.map(char => 
+                alfabeto.includes(char) ? 
+                alfabeto[(alfabeto.indexOf(char) + shift + alfabeto.length) % alfabeto.length] : 
+                char
+            );
+        };
+
+        const animateChar = (spanChar, targetChar) => {
+            let cambiosDeLetra = 0;
+            return new Promise(resolve => {
+                const intervalo = setInterval(() => {
+                    spanChar.innerHTML = alfabeto[Math.floor(Math.random() * alfabeto.length)];
+                    cambiosDeLetra++;
+                    if(cambiosDeLetra === 3) {
+                        clearInterval(intervalo);
+                        spanChar.innerHTML = targetChar;
+                        resolve();
+                    }
+                }, 50);
+            });
+        };
+
+        const processMessage = (input, output, shift) => {
+            const wordArray = [...input.value.toUpperCase()];
+            output.innerHTML = '';
+            wordArray.forEach((char, index) => {
+                const spanChar = document.createElement("span");
+                output.appendChild(spanChar);
+                animateChar(spanChar, shiftMessage([char], shift)[0]);
+            });
+        };
+
+        const submitCifrar = e => {
+            e.preventDefault();
+            processMessage(inputOriginal, resultado, parseInt(rango.value));
+        };
+
+        const submitDescifrar = e => {
+            e.preventDefault();
+            processMessage(inputDescifrar, descifrado, -parseInt(rango.value));
+        };
+
+        cifrador.onsubmit = submitCifrar;
+        descifrador.onsubmit = submitDescifrar;
+    </script>
+</body>
+</html>
